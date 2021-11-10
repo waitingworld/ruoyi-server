@@ -260,7 +260,7 @@ public class ProcessServiceImpl implements IProcessService {
     }
 
     @Override
-    public JSONObject startProcess(String processDefinitionKey, Long userId, String businessKey, JSONObject variablesJson) {
+    public JSONObject startProcess(String processDefinitionKey, String userId, String businessKey, JSONObject variablesJson) {
         Map<String, Object> variables = new HashMap<>();
         variables.putAll(variablesJson);
         variables.put("startUser", userId);
@@ -338,7 +338,7 @@ public class ProcessServiceImpl implements IProcessService {
     }
 
     @Override
-    public JSONObject getTodoList(Long userId, int pageNo, int pageSize) {
+    public JSONObject getTodoList(String userId, int pageNo, int pageSize) {
         TaskQuery taskQuery = taskService.createTaskQuery().taskCandidateOrAssigned(userId.toString()).orderByTaskCreateTime().desc();
         List<Task> taskList = taskQuery.listPage(pageNo - 1, pageSize);
         JSONObject result = new JSONObject();
@@ -371,7 +371,7 @@ public class ProcessServiceImpl implements IProcessService {
     }
 
     @Override
-    public JSONObject getDoneList(Long userId, int pageNo, int pageSize) {
+    public JSONObject getDoneList(String userId, int pageNo, int pageSize) {
         HistoricTaskInstanceQuery taskInstanceQuery = historyService.createHistoricTaskInstanceQuery()
                 .taskInvolvedUser(userId.toString())
                 .finished()

@@ -21,7 +21,7 @@ public interface IProcessService {
      * @param variablesJson
      * @return
      */
-    JSONObject startProcess(String processDefinitionKey, Long userId, String businessKey, JSONObject variablesJson);
+    JSONObject startProcess(String processDefinitionKey, String userId, String businessKey, JSONObject variablesJson);
 
     /**
      * 根据流程实力id获取用户任务
@@ -39,7 +39,7 @@ public interface IProcessService {
      * @param pageSize
      * @return
      */
-    JSONObject getTodoList(Long userId, int pageNo, int pageSize);
+    JSONObject getTodoList(String userId, int pageNo, int pageSize);
 
     /**
      * 根据UserId获取已办列表
@@ -49,7 +49,7 @@ public interface IProcessService {
      * @param pageSize
      * @return
      */
-    JSONObject getDoneList(Long userId, int pageNo, int pageSize);
+    JSONObject getDoneList(String userId, int pageNo, int pageSize);
 
     /**
      * 完成用户任务
