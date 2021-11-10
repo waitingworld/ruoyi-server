@@ -111,6 +111,7 @@ public class ProcessServiceImpl implements IProcessService {
 
         result.put("model", model);
         String xmlStr = this.getOrgXml(category, processKey, processName);
+        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
         result.put("xmlStr", xmlStr);
         result.put("success", true);
         return result;
@@ -170,6 +171,7 @@ public class ProcessServiceImpl implements IProcessService {
 
     @Override
     public JSONObject deploymentByXml(String xmlStr) {
+        xmlStr = StringUtils.join(xmlStr.split("camunda"), "activiti");
         log.debug(xmlStr);
         JSONObject result = new JSONObject();
         try {
@@ -237,7 +239,7 @@ public class ProcessServiceImpl implements IProcessService {
             result.put("success", true);
 
             WorkFlowGeXml workFlowGeXml = new WorkFlowGeXml();
-            workFlowGeXml.setDeployment_id(model.getDeploymentId());
+            workFlowGeXml.setDeploymentId(model.getDeploymentId());
             workFlowGeXml.setXml(xmlStr);
             workFlowGeXmlMapper.insert(workFlowGeXml);
 
@@ -567,7 +569,9 @@ public class ProcessServiceImpl implements IProcessService {
 //        String resourceName = repositoryService.createProcessDefinitionQuery().deploymentId(model.getDeploymentId()).singleResult().getResourceName();
 //        InputStream inputStream = repositoryService.getResourceAsStream(model.getDeploymentId(), resourceName);
         WorkFlowGeXml workFlowGeXml = workFlowGeXmlMapper.selectById(model.getDeploymentId());
-        result.put("xmlStr", workFlowGeXml.getXml());
+        String xmlStr = workFlowGeXml.getXml();
+        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
+        result.put("xmlStr", xmlStr);
 //            result.put("xmlStr", IOUtils.toString(inputStream, "utf-8"));
         result.put("success", true);
         return result;

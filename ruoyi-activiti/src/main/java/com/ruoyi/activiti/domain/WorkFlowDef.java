@@ -26,7 +26,7 @@ public class WorkFlowDef {
     @TableField(value = "deployment_id")
     private String deploymentId;//部署id
     @TableField(value = "model_id")
-    private String modelId;//部署id
+    private String modelId;//
     @TableField(value = "delete_flag")
     private String deleteFlag;//删除标识，0删除，;1未删除
 

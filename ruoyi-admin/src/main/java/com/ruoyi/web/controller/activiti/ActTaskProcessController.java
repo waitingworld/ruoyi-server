@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/activiti/task")
-public class ActTaskProcess extends BaseController {
+public class ActTaskProcessController extends BaseController {
     @Autowired
     private IProcessService processService;
 

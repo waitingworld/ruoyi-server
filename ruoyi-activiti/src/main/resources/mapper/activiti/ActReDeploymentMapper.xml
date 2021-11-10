@@ -18,7 +18,7 @@
     </sql>
 
     <select id="selectAllCatgory" resultType="com.alibaba.fastjson.JSONObject">
-        select distinct category as id, category as label
+        select distinct category as "id", category as "label"
         from work_flow_def where delete_flag = '1'
     </select>
 </mapper>

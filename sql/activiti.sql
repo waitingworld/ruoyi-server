@@ -6,6 +6,7 @@ create table WORK_FLOW_DEF
     description   VARCHAR2(2000),
     version       VARCHAR2(255),
     category      VARCHAR2(255),
+    model_id      VARCHAR2(255),
     create_time   DATE,
     update_time   DATE,
     deployment_id VARCHAR2(255),
