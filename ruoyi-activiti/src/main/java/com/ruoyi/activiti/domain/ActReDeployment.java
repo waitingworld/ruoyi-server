@@ -2,6 +2,7 @@ package com.ruoyi.activiti.domain;
 
 import java.util.Date;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -20,6 +21,7 @@ public class ActReDeployment extends BaseEntity {
     /**
      * $column.columnComment
      */
+    @TableId(value = "id_")
     private String id;
 
     /**
