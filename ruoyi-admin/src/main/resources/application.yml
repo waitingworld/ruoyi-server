@@ -45,7 +45,10 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
+    #加载配置文件application-druid.yml
     active: druid
+    #额外加载配置文件application-activiti.yml
+    include: activiti
   # 文件上传
   servlet:
      multipart:

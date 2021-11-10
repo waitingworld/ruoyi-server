@@ -1,0 +1,23 @@
+spring:
+  activiti:
+    #数据表生成策略
+    #database-schema-update
+    #false：false为默认值，启动时，对比数据库表版本，版本不匹配时抛出异常。
+    #true：启动时对数据库中表进行更新，如果表不存在，则自动创建。
+    #create-drop：启动时，执行数据库表的创建操作，关闭时，执行数据库表的删除操作。
+    #drop-create：启动时，执行数据库表的删除操作,关闭时，执行数据库表的创建操作。
+    database-schema-update: true
+
+    #生成历史记录相关表
+    db-history-used: true
+
+    #不检查默认路径下的.bpmn文件，否则若没有就报错
+    check-process-definitions: false
+
+    #none：不保存任何的历史数据，最高效
+    #activity：级别高于none，保存流程实例与流程行为，其他数据不保存。
+    #audit：除activity级别会保存的数据外，还会保存全部的流程任务及其属性。audit为history的默认值。
+    #full：除了保存audit级别的数据外，还会保存其他全部流程相关的细节数据，包括一些流程参数等。
+    history-level: full
+  main:
+    allow-bean-definition-overriding: true

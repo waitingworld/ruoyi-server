@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.activiti.mapper.ActReDeploymentMapper">
+    <resultMap type="ActReDeployment" id="ActReDeploymentResult">
+        <result property="id" column="ID_"/>
+        <result property="name" column="NAME_"/>
+        <result property="category" column="CATEGORY_"/>
+        <result property="key" column="KEY_"/>
+        <result property="tenantId" column="TENANT_ID_"/>
+        <result property="deployTime" column="DEPLOY_TIME_"/>
+        <result property="engineVersion" column="ENGINE_VERSION_"/>
+    </resultMap>
+    <sql id="selectActReDeploymentVo">
+        select ID_, NAME_, CATEGORY_, KEY_, TENANT_ID_, DEPLOY_TIME_, ENGINE_VERSION_
+        from act_re_deployment
+    </sql>
+
+    <select id="selectAllCatgory" resultType="com.alibaba.fastjson.JSONObject">
+        select distinct category as id, category as label
+        from work_flow_def where delete_flag = '1'
+    </select>
+</mapper>

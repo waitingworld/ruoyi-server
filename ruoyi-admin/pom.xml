@@ -83,6 +83,11 @@
             <artifactId>ruoyi-business</artifactId>
         </dependency>
 
+        <!-- 工作流-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-activiti</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
