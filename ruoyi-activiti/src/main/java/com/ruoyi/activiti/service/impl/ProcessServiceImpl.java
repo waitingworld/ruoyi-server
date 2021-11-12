@@ -1,5 +1,6 @@
 package com.ruoyi.activiti.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -347,29 +348,34 @@ public class ProcessServiceImpl implements IProcessService {
         List<JSONObject> taskListJson = new ArrayList<>();
         for (Task task : taskList) {
             ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
-            JSONObject tmp = new JSONObject();
-            tmp.put("Assignee", task.getAssignee());
-            tmp.put("Category", task.getCategory());
-            tmp.put("ClaimTime", task.getClaimTime());
-            tmp.put("CreateTime", task.getCreateTime());
-            tmp.put("Id", task.getId());
-            tmp.put("DelegationState", task.getDelegationState());
-            tmp.put("Description", task.getDescription());
-            tmp.put("DueDate", task.getDueDate());
-            tmp.put("ExecutionId", task.getExecutionId());
-            tmp.put("Name", task.getName());
-            tmp.put("ProcessName", processDefinition.getName());
-            tmp.put("Owner", task.getOwner());
-            tmp.put("ParentTaskId", task.getParentTaskId());
-            tmp.put("ProcessInstanceId", task.getProcessInstanceId());
-            tmp.put("TenantId", task.getTenantId());
-            tmp.put("FormKey", task.getFormKey());
-            tmp.put("NextNodes", this.getNextNode(task.getId(), UserTask.class));
+            JSONObject tmp = createTaskJson(task, processDefinition);
+            tmp.put("NextNodes", this.getNextNode(task.getId()));
             taskListJson.add(tmp);
         }
         result.put("tasks", taskListJson);
         result.put("total", taskQuery.count());
         return result;
+    }
+
+    private JSONObject createTaskJson(Task task, ProcessDefinition processDefinition) {
+        JSONObject tmp = new JSONObject();
+        tmp.put("Assignee", task.getAssignee());
+        tmp.put("Category", task.getCategory());
+        tmp.put("ClaimTime", task.getClaimTime());
+        tmp.put("CreateTime", task.getCreateTime());
+        tmp.put("Id", task.getId());
+        tmp.put("DelegationState", task.getDelegationState());
+        tmp.put("Description", task.getDescription());
+        tmp.put("DueDate", task.getDueDate());
+        tmp.put("ExecutionId", task.getExecutionId());
+        tmp.put("Name", task.getName());
+        tmp.put("ProcessName", processDefinition.getName());
+        tmp.put("Owner", task.getOwner());
+        tmp.put("ParentTaskId", task.getParentTaskId());
+        tmp.put("ProcessInstanceId", task.getProcessInstanceId());
+        tmp.put("TenantId", task.getTenantId());
+        tmp.put("FormKey", task.getFormKey());
+        return tmp;
     }
 
     @Override
@@ -396,10 +402,10 @@ public class ProcessServiceImpl implements IProcessService {
      * 获取当前TaskId对应的节点的下一个节点
      *
      * @param taskId
-     * @param T
      * @return
      */
-    private List<JSONObject> getNextNode(String taskId, Class T) {
+    @Override
+    public List<JSONObject> getNextNode(String taskId) {
         Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processDefinitionId = currentTask.getProcessDefinitionId();
         BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
@@ -408,9 +414,16 @@ public class ProcessServiceImpl implements IProcessService {
         FlowElement currentElement = this.getCurrentElement(process, currentTask);
         List<JSONObject> nextNode = new ArrayList<>();
         if (currentElement != null) {
-            findNextNodeByOutgoingFlows(T, ((UserTask) currentElement).getOutgoingFlows(), nextNode);
+            findNextNodeByOutgoingFlows(UserTask.class, ((UserTask) currentElement).getOutgoingFlows(), nextNode);
         }
         return nextNode;
+    }
+
+    @Override
+    public JSONObject getTaskInfo(String taskId) {
+        Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(currentTask.getProcessDefinitionId()).singleResult();
+        return this.createTaskJson(currentTask, processDefinition);
     }
 
     /**

@@ -27,7 +27,7 @@ public class ActTaskProcessController extends BaseController {
     public AjaxResult getTodoList(@RequestBody JSONObject params) {
         int pageNo = params.getInteger("pageNo");
         int pageSize = params.getInteger("pageSize");
-        String userId = params.containsKey("userId")  ? params.getString("userId") : SecurityUtils.getUserId();
+        String userId = params.containsKey("userId") ? params.getString("userId") : SecurityUtils.getUserId();
         return AjaxResult.success(processService.getTodoList(userId, pageNo, pageSize));
     }
 
@@ -41,7 +41,7 @@ public class ActTaskProcessController extends BaseController {
     public AjaxResult getDoneList(@RequestBody JSONObject params) {
         int pageNo = params.getInteger("pageNo");
         int pageSize = params.getInteger("pageSize");
-        String userId = params.containsKey("userId")  ? params.getString("userId") : SecurityUtils.getUserId();
+        String userId = params.containsKey("userId") ? params.getString("userId") : SecurityUtils.getUserId();
         return AjaxResult.success(processService.getDoneList(userId, pageNo, pageSize));
     }
 
@@ -56,5 +56,23 @@ public class ActTaskProcessController extends BaseController {
         String taskId = params.getString("taskId");
         JSONObject variablesJson = params.getJSONObject("variablesJson");
         return AjaxResult.success(processService.completeTask(taskId, variablesJson));
+    }
+
+    /**
+     * 根据taskId获取下一步节点
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping(value = "/getNextNode")
+    public AjaxResult getNextNode(@RequestBody JSONObject params) {
+        String taskId = params.getString("taskId");
+        return AjaxResult.success(processService.getNextNode(taskId));
+    }
+
+    @PostMapping(value = "/getTaskInfo")
+    public AjaxResult getTaskInfo(@RequestBody JSONObject params) {
+        String taskId = params.getString("taskId");
+        return AjaxResult.success(processService.getTaskInfo(taskId));
     }
 }

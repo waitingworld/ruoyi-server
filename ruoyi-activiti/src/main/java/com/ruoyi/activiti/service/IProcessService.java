@@ -2,6 +2,8 @@ package com.ruoyi.activiti.service;
 
 import com.alibaba.fastjson.JSONObject;
 
+import java.util.List;
+
 public interface IProcessService {
 
     /**
@@ -98,4 +100,12 @@ public interface IProcessService {
      * @return
      */
     JSONObject deleteProcessDefind(JSONObject params);
+
+    /**
+     * 获取下一个节点
+     * @param taskId
+     * @return
+     */
+    List<JSONObject> getNextNode(String taskId);
+    JSONObject getTaskInfo(String taskId);
 }

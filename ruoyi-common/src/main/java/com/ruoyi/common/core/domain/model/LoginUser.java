@@ -1,8 +1,11 @@
 package com.ruoyi.common.core.domain.model;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ruoyi.common.core.domain.entity.SysGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -227,8 +230,13 @@ public class LoginUser implements UserDetails {
         this.user = user;
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        Collection<GrantedAuthority> grantedAuthorities = new HashSet<>();
+        grantedAuthorities.add(new SysGrantedAuthority("ROLE_ACTIVITI_USER"));
+        grantedAuthorities.add(new SysGrantedAuthority("GROUP_activitiTeam"));
+        return grantedAuthorities;
     }
+
 }
