@@ -1,11 +1,11 @@
 package com.ruoyi.activiti.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.util.StringUtil;
 import com.ruoyi.activiti.domain.WorkFlowDef;
 import com.ruoyi.activiti.domain.WorkFlowGeXml;
 import com.ruoyi.activiti.mapper.ActReDeploymentMapper;
@@ -15,6 +15,7 @@ import com.ruoyi.activiti.service.IProcessService;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.system.service.ISysUserService;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.Process;
 import org.activiti.bpmn.model.*;
@@ -22,11 +23,13 @@ import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricActivityInstance;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.history.HistoricTaskInstanceQuery;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
-import org.activiti.engine.repository.ModelQuery;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -36,11 +39,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.print.attribute.HashAttributeSet;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProcessServiceImpl implements IProcessService {
@@ -49,6 +54,8 @@ public class ProcessServiceImpl implements IProcessService {
 
     @Autowired
     private RepositoryService repositoryService;
+    @Autowired
+    private ISysUserService sysUserService;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -202,7 +209,10 @@ public class ProcessServiceImpl implements IProcessService {
             log.info("deploymentByXml:" + process.getName() + ", " + processKey + ".bpmn20.xml" + ", " + processKey + ", " + bpmnModel.getTargetNamespace());
             log.debug("xmlStr:" + xmlStr);
 
-            ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionKey(processKey).latestVersion().singleResult();
+            ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
+                    .processDefinitionKey(processKey)
+                    .latestVersion()
+                    .singleResult();
 
             Model model = repositoryService.createModelQuery().modelKey(processKey).singleResult();
             if (model == null) {
@@ -273,31 +283,31 @@ public class ProcessServiceImpl implements IProcessService {
         List<JSONObject> tasksJson = new ArrayList<>();
         for (Task task : tasks) {
             JSONObject tmp = new JSONObject();
-            tmp.put("Id", task.getId());
-            tmp.put("Name", task.getName());
-            tmp.put("Assignee", task.getAssignee());
-            tmp.put("Category", task.getCategory());
-            tmp.put("ProcessInstanceId", task.getProcessInstanceId());
-            tmp.put("TaskDefinitionKey", task.getTaskDefinitionKey());
-            tmp.put("ClaimTime", task.getClaimTime());
-            tmp.put("CreateTime", task.getCreateTime());
-            tmp.put("DueDate", task.getDueDate());
-            tmp.put("Owner", task.getOwner());
+            tmp.put("id", task.getId());
+            tmp.put("name", task.getName());
+            tmp.put("assignee", task.getAssignee());
+            tmp.put("category", task.getCategory());
+            tmp.put("processInstanceId", task.getProcessInstanceId());
+            tmp.put("taskDefinitionKey", task.getTaskDefinitionKey());
+            tmp.put("claimTime", task.getClaimTime());
+            tmp.put("createTime", task.getCreateTime());
+            tmp.put("dueDate", task.getDueDate());
+            tmp.put("owner", task.getOwner());
             taskService.claim(task.getId(), task.getAssignee());
             tasksJson.add(tmp);
         }
         JSONObject processInstanceJson = new JSONObject();
-        processInstanceJson.put("Id", processInstance.getId());
-        processInstanceJson.put("ProcessInstanceId", processInstance.getProcessInstanceId());
-        processInstanceJson.put("BusinessKey", processInstance.getBusinessKey());
-        processInstanceJson.put("DeploymentId", processInstance.getDeploymentId());
-        processInstanceJson.put("Name", processInstance.getName());
-        processInstanceJson.put("ProcessDefinitionKey", processInstance.getProcessDefinitionKey());
-        processInstanceJson.put("Description", processInstance.getDescription());
-        processInstanceJson.put("ProcessVariables", processInstance.getProcessVariables());
-        processInstanceJson.put("StartTime", processInstance.getStartTime());
-        processInstanceJson.put("StartUserId", processInstance.getStartUserId());
-        processInstanceJson.put("ProcessDefinitionVersion", processInstance.getProcessDefinitionVersion());
+        processInstanceJson.put("id", processInstance.getId());
+        processInstanceJson.put("processInstanceId", processInstance.getProcessInstanceId());
+        processInstanceJson.put("businessKey", processInstance.getBusinessKey());
+        processInstanceJson.put("deploymentId", processInstance.getDeploymentId());
+        processInstanceJson.put("name", processInstance.getName());
+        processInstanceJson.put("processDefinitionKey", processInstance.getProcessDefinitionKey());
+        processInstanceJson.put("description", processInstance.getDescription());
+        processInstanceJson.put("processVariables", processInstance.getProcessVariables());
+        processInstanceJson.put("startTime", processInstance.getStartTime());
+        processInstanceJson.put("startUserId", processInstance.getStartUserId());
+        processInstanceJson.put("processDefinitionVersion", processInstance.getProcessDefinitionVersion());
         result.put("tasks", tasksJson);
         result.put("processInstance", processInstanceJson);
         return result;
@@ -347,9 +357,11 @@ public class ProcessServiceImpl implements IProcessService {
         JSONObject result = new JSONObject();
         List<JSONObject> taskListJson = new ArrayList<>();
         for (Task task : taskList) {
-            ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(task.getProcessDefinitionId()).singleResult();
-            JSONObject tmp = createTaskJson(task, processDefinition);
-            tmp.put("NextNodes", this.getNextNode(task.getId()));
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                    .processInstanceId(task.getProcessInstanceId())
+                    .singleResult();
+            JSONObject tmp = createTaskJson(task, historicProcessInstance);
+            tmp.put("nextNodes", this.getNextNode(task.getId()));
             taskListJson.add(tmp);
         }
         result.put("tasks", taskListJson);
@@ -357,38 +369,85 @@ public class ProcessServiceImpl implements IProcessService {
         return result;
     }
 
-    private JSONObject createTaskJson(Task task, ProcessDefinition processDefinition) {
+    private JSONObject createTaskJson(Task task, HistoricProcessInstance historicProcessInstance) {
         JSONObject tmp = new JSONObject();
-        tmp.put("Assignee", task.getAssignee());
-        tmp.put("Category", task.getCategory());
-        tmp.put("ClaimTime", task.getClaimTime());
-        tmp.put("CreateTime", task.getCreateTime());
-        tmp.put("Id", task.getId());
-        tmp.put("DelegationState", task.getDelegationState());
-        tmp.put("Description", task.getDescription());
-        tmp.put("DueDate", task.getDueDate());
-        tmp.put("ExecutionId", task.getExecutionId());
-        tmp.put("Name", task.getName());
-        tmp.put("ProcessName", processDefinition.getName());
-        tmp.put("Owner", task.getOwner());
-        tmp.put("ParentTaskId", task.getParentTaskId());
-        tmp.put("ProcessInstanceId", task.getProcessInstanceId());
-        tmp.put("TenantId", task.getTenantId());
-        tmp.put("FormKey", task.getFormKey());
+        tmp.put("assignee", task.getAssignee());
+        if (StringUtils.isNotEmpty(task.getAssignee())) {
+            tmp.put("assigneeName", sysUserService.selectUserById(task.getAssignee()).getNickName());
+        }
+        if (StringUtils.isNotEmpty(task.getOwner())) {
+            tmp.put("ownerName", sysUserService.selectUserById(task.getOwner()).getNickName());
+        }
+        tmp.put("category", task.getCategory());
+        tmp.put("startTime", task.getCreateTime());
+        tmp.put("claimTime", task.getClaimTime());
+        tmp.put("id", task.getId());
+        tmp.put("delegationState", task.getDelegationState());//委托状态
+        tmp.put("description", task.getDescription());
+        tmp.put("executionId", task.getExecutionId());
+        tmp.put("name", task.getName());
+        tmp.put("owner", task.getOwner());
+        tmp.put("parentTaskId", task.getParentTaskId());
+        tmp.put("processInstanceId", task.getProcessInstanceId());
+        tmp.put("tenantId", task.getTenantId());
+
+        tmp.put("createTime", historicProcessInstance.getStartTime());
+        tmp.put("processName", historicProcessInstance.getProcessDefinitionName());
+        tmp.put("businessKey", historicProcessInstance.getBusinessKey());
+        tmp.put("modelId", repositoryService.createModelQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult().getId());
         return tmp;
     }
 
     @Override
     public JSONObject getDoneList(String userId, int pageNo, int pageSize) {
         HistoricTaskInstanceQuery taskInstanceQuery = historyService.createHistoricTaskInstanceQuery()
-                .taskInvolvedUser(userId.toString())
+                .taskAssignee(userId)
                 .finished()
                 .orderByTaskCreateTime().desc();
         List<HistoricTaskInstance> taskList = taskInstanceQuery.listPage(pageNo - 1, pageSize);
+        List<JSONObject> taskJsonList = new ArrayList<>();
         JSONObject result = new JSONObject();
-        result.put("tasks", taskList);
+        for (HistoricTaskInstance historicTaskInstance : taskList) {
+            HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                    .processInstanceId(historicTaskInstance.getProcessInstanceId())
+                    .singleResult();
+            JSONObject tmp = createDoneTaskJson(historicTaskInstance, historicProcessInstance);
+            taskJsonList.add(tmp);
+        }
+        result.put("tasks", taskJsonList);
         result.put("total", taskInstanceQuery.count());
         return result;
+    }
+
+    private JSONObject createDoneTaskJson(HistoricTaskInstance task, HistoricProcessInstance historicProcessInstance) {
+        JSONObject tmp = new JSONObject();
+        tmp.put("assignee", task.getAssignee());
+        if (StringUtils.isNotEmpty(task.getAssignee())) {
+            tmp.put("assigneeName", sysUserService.selectUserById(task.getAssignee()).getNickName());
+        }
+        if (StringUtils.isNotEmpty(task.getOwner())) {
+            tmp.put("ownerName", sysUserService.selectUserById(task.getOwner()).getNickName());
+        }
+        tmp.put("id", task.getId());
+        tmp.put("startTime", task.getCreateTime());
+        tmp.put("claimTime", task.getClaimTime());
+        tmp.put("endTime", task.getEndTime());
+        tmp.put("description", task.getDescription());
+        if (task.getDurationInMillis() != null) {
+            tmp.put("dueDate", (task.getDurationInMillis() / 1000 / 60));
+        }
+        tmp.put("executionId", task.getExecutionId());
+        tmp.put("name", task.getName());
+        tmp.put("owner", task.getOwner());
+        tmp.put("parentTaskId", task.getParentTaskId());
+        tmp.put("processInstanceId", task.getProcessInstanceId());
+        tmp.put("tenantId", task.getTenantId());
+
+        tmp.put("businessKey", historicProcessInstance.getBusinessKey());
+        tmp.put("processName", historicProcessInstance.getProcessDefinitionName());
+        tmp.put("createTime", historicProcessInstance.getStartTime());
+        tmp.put("modelId", repositoryService.createModelQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult().getId());
+        return tmp;
     }
 
     @Override
@@ -421,9 +480,65 @@ public class ProcessServiceImpl implements IProcessService {
 
     @Override
     public JSONObject getTaskInfo(String taskId) {
-        Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
-        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(currentTask.getProcessDefinitionId()).singleResult();
-        return this.createTaskJson(currentTask, processDefinition);
+        HistoricTaskInstance taskInstance = historyService.createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
+        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(taskInstance.getProcessInstanceId())
+                .singleResult();
+        return this.createDoneTaskJson(taskInstance, historicProcessInstance);
+    }
+
+    @Override
+    public JSONObject getHistoryTask(String processInstanceId) {
+        List<HistoricActivityInstance> historicActivityInstances = historyService.createHistoricActivityInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .list();
+        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .singleResult();
+        Model processModel = repositoryService.createModelQuery()
+                .deploymentId(historicProcessInstance.getDeploymentId())
+                .singleResult();
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(historicProcessInstance.getProcessDefinitionId());
+        List<String> highLightedShapes = new ArrayList<>();
+        Process process = bpmnModel.getMainProcess();
+        Map<String, FlowElement> flowElementMap = process.getFlowElementMap();
+        List<String> historicTaskIds = new ArrayList<>();
+        for (HistoricActivityInstance historicActivityInstance : historicActivityInstances) {
+            historicTaskIds.add(historicActivityInstance.getActivityId());
+        }
+        for (HistoricActivityInstance historicActivityInstance : historicActivityInstances) {
+            String activityId = historicActivityInstance.getActivityId();
+            highLightedShapes.add(activityId);
+            if (historicActivityInstance.getActivityType().indexOf("Gateway") > -1) {
+                Gateway tmp = (Gateway) process.getFlowElementMap().get(activityId);
+                this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
+            }
+            if (historicActivityInstance.getActivityType().indexOf("Task") > -1) {
+                org.activiti.bpmn.model.Task tmp = (org.activiti.bpmn.model.Task) process.getFlowElementMap().get(activityId);
+                this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
+            }
+            if (historicActivityInstance.getActivityType().indexOf("subProcess") > -1) {
+                SubProcess tmp = (SubProcess) process.getFlowElementMap().get(activityId);
+                this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
+            }
+        }
+
+        List<Task> currentTask = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+
+        JSONObject result = new JSONObject();
+        result.put("success", true);
+        result.put("highLightedShapes", highLightedShapes);
+        result.put("currentTask", currentTask);
+        return result;
+    }
+
+    private void getHightLine(List<String> highLightedShapes, List<String> historicTaskIds, List<SequenceFlow> outgoingFlows) {
+        for (SequenceFlow outgoingFlow : outgoingFlows) {
+            String targetElementId = outgoingFlow.getTargetFlowElement().getId();
+            if (historicTaskIds.contains(targetElementId)) {
+                highLightedShapes.add(outgoingFlow.getId());
+            }
+        }
     }
 
     /**
@@ -491,21 +606,21 @@ public class ProcessServiceImpl implements IProcessService {
      */
     private void createFindNodeResult(List<JSONObject> nextNode, SequenceFlow outgoingFlow, FlowElement targetElement) {
         JSONObject tmp = new JSONObject();
-        tmp.put("Id", targetElement.getId());
-        tmp.put("Name", targetElement.getName());
-        tmp.put("Attributes", targetElement.getAttributes());
+        tmp.put("id", targetElement.getId());
+        tmp.put("name", targetElement.getName());
+        tmp.put("attributes", targetElement.getAttributes());
         tmp.put("outgoingFlow_ConditionExpression", outgoingFlow.getConditionExpression());
         tmp.put("outgoingFlow_Attributes", outgoingFlow.getAttributes());
         if (targetElement instanceof UserTask) {
             String assigneeStr = ((UserTask) targetElement).getAssignee();
             if (StringUtils.isNotEmpty(assigneeStr) && assigneeStr.startsWith("${") && assigneeStr.endsWith("}")) {
-                tmp.put("Assignee", assigneeStr.substring(2, assigneeStr.length() - 1));
+                tmp.put("assignee", assigneeStr.substring(2, assigneeStr.length() - 1));
             } else {
-                tmp.put("Assignee", ((UserTask) targetElement).getAssignee());
+                tmp.put("assignee", ((UserTask) targetElement).getAssignee());
             }
-            tmp.put("Owner", ((UserTask) targetElement).getOwner());
-            tmp.put("FormKey", ((UserTask) targetElement).getFormKey());
-            tmp.put("BusinessCalendarName", ((UserTask) targetElement).getBusinessCalendarName());
+            tmp.put("owner", ((UserTask) targetElement).getOwner());
+            tmp.put("formKey", ((UserTask) targetElement).getFormKey());
+            tmp.put("businessCalendarName", ((UserTask) targetElement).getBusinessCalendarName());
         } else if (targetElement instanceof Gateway) {
             tmp.put("DefaultFlow", ((Gateway) targetElement).getDefaultFlow());
         }

@@ -75,4 +75,10 @@ public class ActTaskProcessController extends BaseController {
         String taskId = params.getString("taskId");
         return AjaxResult.success(processService.getTaskInfo(taskId));
     }
+
+    @PostMapping(value = "/getHistoryTask")
+    public AjaxResult getHistoryTask(@RequestBody JSONObject params) {
+        String processInstanceId = params.getString("processInstanceId");
+        return AjaxResult.success(processService.getHistoryTask(processInstanceId));
+    }
 }

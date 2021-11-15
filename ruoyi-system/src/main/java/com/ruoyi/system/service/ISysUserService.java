@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+
 import com.ruoyi.common.core.domain.entity.SysUser;
 
 /**
@@ -8,8 +9,7 @@ import com.ruoyi.common.core.domain.entity.SysUser;
  *
  * @author ruoyi
  */
-public interface ISysUserService
-{
+public interface ISysUserService {
     /**
      * 根据条件分页查询用户列表
      *
@@ -70,10 +70,10 @@ public interface ISysUserService
      * 校验用户名称是否唯一
      *
      * @param userName 用户名称
-     * @param userId 用户id
+     * @param userId   用户id
      * @return 结果
      */
-    public String checkUserNameUnique(String userName,String userId);
+    public String checkUserNameUnique(String userName, String userId);
 
     /**
      * 校验手机号码是否唯一
@@ -132,7 +132,7 @@ public interface ISysUserService
     /**
      * 用户授权角色
      *
-     * @param userId 用户ID
+     * @param userId  用户ID
      * @param roleIds 角色组
      */
     public void insertUserAuth(String userId, Long[] roleIds);
@@ -157,7 +157,7 @@ public interface ISysUserService
      * 修改用户头像
      *
      * @param userName 用户名
-     * @param avatar 头像地址
+     * @param avatar   头像地址
      * @return 结果
      */
     public boolean updateUserAvatar(String userName, String avatar);
@@ -198,9 +198,9 @@ public interface ISysUserService
     /**
      * 导入用户数据
      *
-     * @param userList 用户数据列表
+     * @param userList        用户数据列表
      * @param isUpdateSupport 是否更新支持，如果已存在，则进行更新数据
-     * @param operName 操作用户
+     * @param operName        操作用户
      * @return 结果
      */
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName);

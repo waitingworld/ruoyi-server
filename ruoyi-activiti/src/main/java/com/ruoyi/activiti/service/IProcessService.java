@@ -103,9 +103,25 @@ public interface IProcessService {
 
     /**
      * 获取下一个节点
+     *
      * @param taskId
      * @return
      */
     List<JSONObject> getNextNode(String taskId);
+
+    /**
+     * 获取任务节点信息
+     *
+     * @param taskId
+     * @return
+     */
     JSONObject getTaskInfo(String taskId);
+
+    /**
+     * 获取历史信息
+     *
+     * @param processInstanceId
+     * @return
+     */
+    JSONObject getHistoryTask(String processInstanceId);
 }
