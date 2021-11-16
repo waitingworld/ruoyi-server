@@ -495,9 +495,6 @@ public class ProcessServiceImpl implements IProcessService {
         HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery()
                 .processInstanceId(processInstanceId)
                 .singleResult();
-        Model processModel = repositoryService.createModelQuery()
-                .deploymentId(historicProcessInstance.getDeploymentId())
-                .singleResult();
         BpmnModel bpmnModel = repositoryService.getBpmnModel(historicProcessInstance.getProcessDefinitionId());
         List<String> highLightedShapes = new ArrayList<>();
         Process process = bpmnModel.getMainProcess();
@@ -509,26 +506,20 @@ public class ProcessServiceImpl implements IProcessService {
         for (HistoricActivityInstance historicActivityInstance : historicActivityInstances) {
             String activityId = historicActivityInstance.getActivityId();
             highLightedShapes.add(activityId);
-            if (historicActivityInstance.getActivityType().indexOf("Gateway") > -1) {
-                Gateway tmp = (Gateway) process.getFlowElementMap().get(activityId);
-                this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
-            }
-            if (historicActivityInstance.getActivityType().indexOf("Task") > -1) {
-                org.activiti.bpmn.model.Task tmp = (org.activiti.bpmn.model.Task) process.getFlowElementMap().get(activityId);
-                this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
-            }
-            if (historicActivityInstance.getActivityType().indexOf("subProcess") > -1) {
-                SubProcess tmp = (SubProcess) process.getFlowElementMap().get(activityId);
-                this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
-            }
+            FlowNode tmp = (FlowNode) flowElementMap.get(activityId);
+            this.getHightLine(highLightedShapes, historicTaskIds, tmp.getOutgoingFlows());
         }
 
         List<Task> currentTask = taskService.createTaskQuery().processInstanceId(processInstanceId).list();
+        List<String> taskIdList = new ArrayList<>();
+        for (Task task : currentTask) {
+            taskIdList.add(task.getTaskDefinitionKey());
+        }
 
         JSONObject result = new JSONObject();
         result.put("success", true);
         result.put("highLightedShapes", highLightedShapes);
-        result.put("currentTask", currentTask);
+        result.put("currentTask", taskIdList);
         return result;
     }
 
@@ -701,6 +692,31 @@ public class ProcessServiceImpl implements IProcessService {
         xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
         result.put("xmlStr", xmlStr);
 //            result.put("xmlStr", IOUtils.toString(inputStream, "utf-8"));
+        result.put("success", true);
+        return result;
+    }
+
+    @Override
+    public JSONObject getProcessXmlByProcessInstanceId(JSONObject params) {
+        JSONObject result = new JSONObject();
+        String processInstanceId = params.getString("processInstanceId");
+        HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+
+        Model model = repositoryService.createModelQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult();
+        if (model == null) {
+            result.put("success", false);
+            result.put("msg", "未找到当前流程图");
+            return result;
+        }
+        if (StringUtils.isEmpty(model.getDeploymentId())) {
+            result.put("xmlStr", this.getOrgXml(model.getCategory(), model.getKey(), model.getName()));
+            result.put("success", true);
+            return result;
+        }
+        WorkFlowGeXml workFlowGeXml = workFlowGeXmlMapper.selectById(model.getDeploymentId());
+        String xmlStr = workFlowGeXml.getXml();
+        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
+        result.put("xmlStr", xmlStr);
         result.put("success", true);
         return result;
     }

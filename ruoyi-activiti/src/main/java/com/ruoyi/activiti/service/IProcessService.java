@@ -86,12 +86,20 @@ public interface IProcessService {
     JSONObject createProcess(JSONObject params);
 
     /**
-     * 建立流程
+     * 通过modelId获取流程xml
      *
      * @param params
      * @return
      */
     JSONObject getProcessXmlByModelId(JSONObject params);
+
+    /**
+     * 通过流程实例id获取流程xml
+     *
+     * @param params
+     * @return
+     */
+    JSONObject getProcessXmlByProcessInstanceId(JSONObject params);
 
     /**
      * 删除流程定义

@@ -72,6 +72,11 @@ public class ActRepositoryController extends BaseController {
         return AjaxResult.success(processService.getProcessXmlByModelId(params));
     }
 
+    @PostMapping(value = "/getProcessXmlByProcessInstanceId")
+    public AjaxResult getProcessXmlByProcessInstanceId(@RequestBody JSONObject params) {
+        return AjaxResult.success(processService.getProcessXmlByProcessInstanceId(params));
+    }
+
     /**
      * 删除流程定义
      * @param params
