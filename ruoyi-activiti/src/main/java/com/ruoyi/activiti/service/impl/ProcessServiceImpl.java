@@ -8,6 +8,7 @@ import com.github.pagehelper.PageInfo;
 import com.github.pagehelper.util.StringUtil;
 import com.ruoyi.activiti.domain.WorkFlowDef;
 import com.ruoyi.activiti.domain.WorkFlowGeXml;
+import com.ruoyi.activiti.listener.ActivitiTaskListener;
 import com.ruoyi.activiti.mapper.ActReDeploymentMapper;
 import com.ruoyi.activiti.mapper.WorkFlowDefMapper;
 import com.ruoyi.activiti.mapper.WorkFlowGeXmlMapper;
@@ -179,7 +180,7 @@ public class ProcessServiceImpl implements IProcessService {
 
     @Override
     public JSONObject deploymentByXml(String xmlStr) {
-        xmlStr = StringUtils.join(xmlStr.split("camunda"), "activiti");
+//        xmlStr = StringUtils.join(xmlStr.split("camunda"), "activiti");
         log.debug(xmlStr);
         JSONObject result = new JSONObject();
         try {
@@ -394,7 +395,6 @@ public class ProcessServiceImpl implements IProcessService {
         tmp.put("createTime", historicProcessInstance.getStartTime());
         tmp.put("processName", historicProcessInstance.getProcessDefinitionName());
         tmp.put("businessKey", historicProcessInstance.getBusinessKey());
-        tmp.put("modelId", repositoryService.createModelQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult().getId());
         return tmp;
     }
 
@@ -446,7 +446,6 @@ public class ProcessServiceImpl implements IProcessService {
         tmp.put("businessKey", historicProcessInstance.getBusinessKey());
         tmp.put("processName", historicProcessInstance.getProcessDefinitionName());
         tmp.put("createTime", historicProcessInstance.getStartTime());
-        tmp.put("modelId", repositoryService.createModelQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult().getId());
         return tmp;
     }
 
@@ -689,7 +688,7 @@ public class ProcessServiceImpl implements IProcessService {
 //        InputStream inputStream = repositoryService.getResourceAsStream(model.getDeploymentId(), resourceName);
         WorkFlowGeXml workFlowGeXml = workFlowGeXmlMapper.selectById(model.getDeploymentId());
         String xmlStr = workFlowGeXml.getXml();
-        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
+//        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
         result.put("xmlStr", xmlStr);
 //            result.put("xmlStr", IOUtils.toString(inputStream, "utf-8"));
         result.put("success", true);
@@ -702,20 +701,9 @@ public class ProcessServiceImpl implements IProcessService {
         String processInstanceId = params.getString("processInstanceId");
         HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
 
-        Model model = repositoryService.createModelQuery().deploymentId(historicProcessInstance.getDeploymentId()).singleResult();
-        if (model == null) {
-            result.put("success", false);
-            result.put("msg", "未找到当前流程图");
-            return result;
-        }
-        if (StringUtils.isEmpty(model.getDeploymentId())) {
-            result.put("xmlStr", this.getOrgXml(model.getCategory(), model.getKey(), model.getName()));
-            result.put("success", true);
-            return result;
-        }
-        WorkFlowGeXml workFlowGeXml = workFlowGeXmlMapper.selectById(model.getDeploymentId());
+        WorkFlowGeXml workFlowGeXml = workFlowGeXmlMapper.selectById(historicProcessInstance.getDeploymentId());
         String xmlStr = workFlowGeXml.getXml();
-        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
+//        xmlStr = StringUtils.join(xmlStr.split("activiti"), "camunda");
         result.put("xmlStr", xmlStr);
         result.put("success", true);
         return result;
