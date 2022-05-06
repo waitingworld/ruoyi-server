@@ -92,6 +92,9 @@
         <if test="userName != null and userName != ''">
             AND u.user_name like concat(concat('%',#{userName}),'%')
         </if>
+        <if test="nickName != null and nickName != ''">
+            AND u.nick_name like concat(concat('%',#{nickName}),'%')
+        </if>
         <if test="status != null and status != ''">
             AND u.status = #{status}
         </if>
@@ -104,7 +107,7 @@
         <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
             AND u.create_time &lt;= to_date(#{params.endTime},'yyyy-MM-dd HH24:mi:ss')
         </if>
-        <if test="deptId != null and deptId != 0">
+        <if test="deptId != null and deptId != ''">
             AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE FIND_IN_SET(#{deptId},
             ancestors) <![CDATA[ <> ]]> 0 ))
         </if>
@@ -191,7 +194,7 @@
     <insert id="insertUser" parameterType="SysUser" useGeneratedKeys="true" keyProperty="userId">
         insert into sys_user(
         <if test="userId != null and userId != ''">user_id,</if>
-        <if test="deptId != null and deptId != 0">dept_id,</if>
+        <if test="deptId != null and deptId != ''">dept_id,</if>
         <if test="userName != null and userName != ''">user_name,</if>
         <if test="nickName != null and nickName != ''">nick_name,</if>
         <if test="email != null and email != ''">email,</if>
@@ -223,7 +226,7 @@
     <update id="updateUser" parameterType="SysUser">
         update sys_user
         <set>
-            <if test="deptId != null and deptId != 0">dept_id = #{deptId},</if>
+            <if test="deptId != null and deptId != ''">dept_id = #{deptId},</if>
             <if test="userName != null and userName != ''">user_name = #{userName},</if>
             <if test="nickName != null and nickName != ''">nick_name = #{nickName},</if>
             <if test="email != null ">email = #{email},</if>
