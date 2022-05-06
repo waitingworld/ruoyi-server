@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.ruoyi.common.enums.DataSourceType;
+import com.ruoyi.framework.datasource.DynamicDataSourceContextHolder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
@@ -84,7 +86,19 @@ public class GenTableServiceImpl implements IGenTableService {
      */
     @Override
     public List<GenTable> selectDbTableList(GenTable genTable) {
-        return genTableMapper.selectDbTableList(genTable);
+        //切换数据源
+        boolean isExist = false;
+        for (DataSourceType value : DataSourceType.values()) {
+            if (value.name().equals(genTable.getDBName())) {
+                isExist = true;
+                DynamicDataSourceContextHolder.setDataSourceType(value.name());
+            }
+        }
+        List<GenTable> res = genTableMapper.selectDbTableList(genTable);
+        if (isExist) {
+            DynamicDataSourceContextHolder.clearDataSourceType();
+        }
+        return res;
     }
 
     /**

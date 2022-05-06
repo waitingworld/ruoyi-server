@@ -17,6 +17,9 @@ import com.ruoyi.common.utils.StringUtils;
 public class GenTable extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    private String DBName;//数据库名称
+    private String userName;//用户名称
+
     /**
      * 编号
      */
@@ -140,6 +143,22 @@ public class GenTable extends BaseEntity {
      * 上级菜单名称字段
      */
     private String parentMenuName;
+
+    public String getDBName() {
+        return DBName;
+    }
+
+    public void setDBName(String DBName) {
+        this.DBName = DBName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public Long getTableId() {
         return tableId;

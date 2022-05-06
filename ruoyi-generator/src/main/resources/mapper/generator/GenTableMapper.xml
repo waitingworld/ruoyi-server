@@ -96,14 +96,20 @@
     </select>
 
     <select id="selectDbTableList" parameterType="GenTable" resultMap="GenTableResult">
-        select lower(dt.table_name) as table_name, dtc.comments as table_comment, uo.created as create_time,
+        select lower(dt.table_name) as table_name,
+        dtc.comments as table_comment,
+        uo.created as create_time,
         uo.last_ddl_time as update_time
-        from user_tables dt, user_tab_comments dtc, user_objects uo
+        from all_tables dt, all_tab_comments dtc, all_objects uo
         where dt.table_name = dtc.table_name
         and dt.table_name = uo.object_name
         and uo.object_type = 'TABLE'
-        AND dt.table_name NOT LIKE 'QRTZ_%' AND dt.table_name NOT LIKE 'GEN_%'
+        AND dt.table_name NOT LIKE 'QRTZ_%'
+        AND dt.table_name NOT LIKE 'GEN_%'
         AND lower(dt.table_name) NOT IN (select table_name from gen_table)
+        <if test="userName != null and userName != ''">
+            and dt.OWNER = upper(#{userName})
+        </if>
         <if test="tableName != null and tableName != ''">
             AND lower(dt.table_name) like lower(concat(concat('%', #{tableName}), '%'))
         </if>
@@ -116,12 +122,15 @@
     <select id="selectDbTableListByNames" resultMap="GenTableResult">
         select lower(dt.table_name) as table_name, dtc.comments as table_comment, uo.created as create_time,
         uo.last_ddl_time as update_time
-        from user_tables dt, user_tab_comments dtc, user_objects uo
+        from all_tables dt, all_tab_comments dtc, all_objects uo
         where dt.table_name = dtc.table_name
         and dt.table_name = uo.object_name
         and uo.object_type = 'TABLE'
         AND dt.table_name NOT LIKE 'QRTZ_%' AND dt.table_name NOT LIKE 'GEN_%'
         AND dt.table_name NOT IN (select table_name from gen_table)
+        <if test="userName != null and userName != ''">
+            and dt.OWNER = upper(#{userName})
+        </if>
         and lower(dt.table_name) in
         <foreach collection="array" item="name" open="(" separator="," close=")">
             #{name}
@@ -130,19 +139,22 @@
 
     <select id="selectTableByName" parameterType="String" resultMap="GenTableResult">
         select lower(dt.table_name) as table_name,
-               dtc.comments         as table_comment,
-               uo.created           as create_time,
-               uo.last_ddl_time     as update_time
-        from user_tables dt,
-             user_tab_comments dtc,
-             user_objects uo
+        dtc.comments as table_comment,
+        uo.created as create_time,
+        uo.last_ddl_time as update_time
+        from all_tables dt,
+        all_tab_comments dtc,
+        all_objects uo
         where dt.table_name = dtc.table_name
-          and dt.table_name = uo.object_name
-          and uo.object_type = 'TABLE'
-          AND dt.table_name NOT LIKE 'QRTZ_%'
-          AND dt.table_name NOT LIKE 'GEN_%'
-          AND dt.table_name NOT IN (select table_name from gen_table)
-          and lower(dt.table_name) = #{tableName}
+        and dt.table_name = uo.object_name
+        and uo.object_type = 'TABLE'
+        AND dt.table_name NOT LIKE 'QRTZ_%'
+        AND dt.table_name NOT LIKE 'GEN_%'
+        AND dt.table_name NOT IN (select table_name from gen_table)
+        and lower(dt.table_name) = #{tableName}
+        <if test="userName != null and userName != ''">
+            and dt.OWNER = upper(#{userName})
+        </if>
     </select>
 
     <select id="selectGenTableById" parameterType="Long" resultMap="GenTableResult">
