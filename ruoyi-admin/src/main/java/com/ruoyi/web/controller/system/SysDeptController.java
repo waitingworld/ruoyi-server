@@ -39,6 +39,14 @@ public class SysDeptController extends BaseController {
     }
 
     /**
+     * 根据部门编号获取详细信息
+     */
+    @PostMapping("/getDeptByParentId")
+    public AjaxResult getDeptByParentId(@RequestBody SysDept dept) {
+        return AjaxResult.success(deptService.selectDeptList(dept));
+    }
+
+    /**
      * 查询部门列表（排除节点）
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
