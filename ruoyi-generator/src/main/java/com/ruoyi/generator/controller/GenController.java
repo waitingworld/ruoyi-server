@@ -1,23 +1,20 @@
 package com.ruoyi.generator.controller;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.core.domain.entity.Diction;
+import com.ruoyi.common.core.domain.entity.SysDictData;
+import com.ruoyi.common.utils.SecurityUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -55,6 +52,30 @@ public class GenController extends BaseController {
     }
 
     /**
+     * 查询数据库列表
+     * @return
+     */
+    @PostMapping("/queryDBList")
+    public AjaxResult queryDBList() {
+        if (SecurityUtils.isAdmin(SecurityUtils.getUserId())) {
+            List<Diction> list = genTableService.queryDBList();
+            return AjaxResult.success(list);
+        } else {
+            return AjaxResult.error("没有权限");
+        }
+    }
+
+    @GetMapping("/queryUserListByDbName")
+    public AjaxResult queryUserListByDbName(@RequestParam("dbName") String dbName) {
+        if (SecurityUtils.isAdmin(SecurityUtils.getUserId())) {
+            List<Diction> list = genTableService.queryUserListByDbName(dbName);
+            return AjaxResult.success(list);
+        } else {
+            return AjaxResult.error("没有权限");
+        }
+    }
+
+    /**
      * 修改代码生成业务
      */
     @PreAuthorize("@ss.hasPermi('tool:gen:query')")
@@ -89,7 +110,7 @@ public class GenController extends BaseController {
     public AjaxResult columnList(Long tableId) {
         List<GenTableColumn> list = genTableColumnService.selectGenTableColumnListByTableId(tableId);
         AjaxResult ajaxResult = AjaxResult.success(list);
-        ajaxResult.put("total",list.size());
+        ajaxResult.put("total", list.size());
         return ajaxResult;
     }
 

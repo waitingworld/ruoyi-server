@@ -65,6 +65,11 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
         <!-- io常用工具类 -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -105,6 +110,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
+            <version>2.11.1</version>
         </dependency>
 
         <!-- 解析客户端操作系统、浏览器等 -->

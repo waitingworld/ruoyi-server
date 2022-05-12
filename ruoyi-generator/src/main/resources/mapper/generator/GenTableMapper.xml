@@ -95,6 +95,10 @@
         </where>
     </select>
 
+    <select id="queryAllUserList" parameterType="String" resultType="com.ruoyi.common.core.domain.entity.Diction">
+        select user_id id, username label, username value from all_users
+    </select>
+
     <select id="selectDbTableList" parameterType="GenTable" resultMap="GenTableResult">
         select lower(dt.table_name) as table_name,
         dtc.comments as table_comment,

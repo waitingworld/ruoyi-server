@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.ruoyi.common.core.domain.entity.Diction;
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.enums.DataSourceType;
 import com.ruoyi.framework.datasource.DynamicDataSourceContextHolder;
 import org.apache.commons.io.FileUtils;
@@ -76,6 +79,36 @@ public class GenTableServiceImpl implements IGenTableService {
     @Override
     public List<GenTable> selectGenTableList(GenTable genTable) {
         return genTableMapper.selectGenTableList(genTable);
+    }
+
+    @Override
+    public List<Diction> queryDBList() {
+        List<Diction> list = new ArrayList<>();
+        for (DataSourceType value : DataSourceType.values()) {
+            Diction diction = new Diction();
+            diction.setId(value.name());
+            diction.setLabel(value.name());
+            diction.setValue(value.name());
+            list.add(diction);
+        }
+        return list;
+    }
+
+    @Override
+    public List<Diction> queryUserListByDbName(String dbName) {
+        //切换数据源
+        boolean isExist = false;
+        for (DataSourceType value : DataSourceType.values()) {
+            if (value.name().equals(dbName)) {
+                isExist = true;
+                DynamicDataSourceContextHolder.setDataSourceType(value.name());
+            }
+        }
+        List<Diction> userList = genTableMapper.queryAllUserList();
+        if (isExist) {
+            DynamicDataSourceContextHolder.clearDataSourceType();
+        }
+        return userList;
     }
 
     /**

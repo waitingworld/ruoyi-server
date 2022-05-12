@@ -1,5 +1,6 @@
 package com.ruoyi.generator.mapper;
 
+import com.ruoyi.common.core.domain.entity.Diction;
 import com.ruoyi.generator.domain.GenTable;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -19,6 +20,9 @@ public interface GenTableMapper {
      * @return 业务集合
      */
     public List<GenTable> selectGenTableList(GenTable genTable);
+
+    public List<Diction> queryAllUserList();
+
 
     /**
      * 查询据库列表
