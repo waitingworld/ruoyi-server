@@ -37,6 +37,26 @@
         from sys_dept d
     </sql>
 
+
+    <select id="selectOrgDeptList" resultMap="SysDeptResult">
+--         select t.*, rownum order_num
+--         from (select distinct t.org_code dept_id,
+--                               t.parent_code as parent_id,
+--                               t.parent_code as ancestors,
+--                               replace(replace(t.full_name, '中华人民共和国', ''),
+--                                       '江苏省',
+--                                       '') dept_name,
+--                               -- rownum order_num,
+--                               '0' as status,
+--                               '0' as del_flag
+--               from ntsjt.Tlpt_org t
+--               where t.org_code is not null
+--                 and t.org_code != t.parent_code
+--            and t.org_status >= 2000
+--         --   and t.org_code in (select distinct dept_id from sys_user)
+--               connect by nocycle prior t.org_code = t.parent_code) t
+    </select>
+
     <select id="selectDeptList" parameterType="SysDept" resultMap="SysDeptResult">
         <include refid="selectDeptVo"/>
         where d.del_flag = '0'

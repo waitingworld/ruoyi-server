@@ -13,6 +13,13 @@ import com.ruoyi.common.core.domain.entity.SysUser;
  */
 @Mapper
 public interface SysUserMapper {
+
+    /**
+     * 获取全部需要同步的用户
+     * @return
+     */
+    public List<SysUser> selectOrgUserList();
+
     /**
      * 根据条件分页查询用户列表
      *

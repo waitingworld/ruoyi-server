@@ -17,10 +17,7 @@ import com.ruoyi.system.service.ISysDeptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +32,83 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
     @Autowired
     private SysRoleMapper roleMapper;
+
+
+
+    @Override
+    public void autoUpdateDeptInfo() {
+
+        SysDept tmp = new SysDept();
+        List<SysDept> currentDeptList = deptMapper.selectDeptList(tmp);
+        List<SysDept> orgDeptList = deptMapper.selectOrgDeptList();
+
+        HashMap<String, SysDept> currentDeptMap = new HashMap<>();
+        HashMap<String, SysDept> orgDeptMap = new HashMap<>();
+
+        for (SysDept SysDept : currentDeptList) {
+            currentDeptMap.put(SysDept.getDeptId(), SysDept);
+        }
+        for (SysDept SysDept : orgDeptList) {
+            orgDeptMap.put(SysDept.getDeptId(), SysDept);
+        }
+
+        List<String> currentDeptIdList = new ArrayList<>(currentDeptMap.keySet());
+        List<String> orgDeptIdList = new ArrayList<>(orgDeptMap.keySet());
+
+        List<SysDept> insertDeptList = new ArrayList<>();
+        List<SysDept> removeDeptList = new ArrayList<>();
+        List<SysDept> updateDeptList = new ArrayList<>();
+
+        orgDeptIdList.removeAll(currentDeptIdList);//获取需要新增的部门
+        for (String deptId : orgDeptIdList) {
+            insertDeptList.add(orgDeptMap.get(deptId));
+        }
+
+        currentDeptIdList = new ArrayList<>(currentDeptMap.keySet());
+        orgDeptIdList = new ArrayList<>(orgDeptMap.keySet());
+
+        currentDeptIdList.removeAll(orgDeptIdList);//获取需要删除的部门
+        for (String deptId : currentDeptIdList) {
+            removeDeptList.add(currentDeptMap.get(deptId));
+        }
+
+        currentDeptIdList = new ArrayList<>(currentDeptMap.keySet());
+        orgDeptIdList = new ArrayList<>(orgDeptMap.keySet());
+
+        currentDeptIdList.retainAll(orgDeptIdList);//获取需要更新的部门
+        for (String deptId : currentDeptIdList) {
+            updateDeptList.add(orgDeptMap.get(deptId));
+        }
+
+        System.out.println("====================================================");
+        System.out.println(insertDeptList.stream().map(dept -> dept.getDeptName()));
+        System.out.println(removeDeptList.stream().map(dept -> dept.getDeptName()));
+        System.out.println(updateDeptList.stream().map(dept -> dept.getDeptName()));
+        System.out.println("====================================================");
+
+        ///////////////////////////////////////////////
+
+        for (SysDept sysDept : insertDeptList) {
+            try {
+                this.insertDept(sysDept);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (SysDept sysDept : removeDeptList) {
+            try {
+                sysDept.setStatus("1");
+                this.updateDept(sysDept);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (SysDept sysDept : updateDeptList) {
+            deptMapper.updateDept(sysDept);
+        }
+    }
 
     /**
      * 查询部门管理数据

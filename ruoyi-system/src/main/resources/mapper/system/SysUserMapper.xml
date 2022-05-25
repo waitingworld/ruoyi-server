@@ -80,6 +80,40 @@
                  left join sys_role r on r.role_id = ur.role_id
     </sql>
 
+    <select id="selectOrgUserList" resultType="SysUser">
+--         select t.user_id,
+--                t.org_code                    DEPT_ID,
+--                t.user_police_id              user_name,
+--                t.user_name                   NICK_NAME,
+--                '01'                       as USER_TYPE,
+--                t.office_email             as EMAIL,
+--                t.user_mobile_long_dianxin as PHONENUMBER,
+--                case
+--                    when t.user_sex = 10 then
+--                        0
+--                    when t.user_sex = 20 then
+--                        1
+--                    else
+--                        2
+--                    end                    as SEX,
+--                'http://50.88.1.97:8082/mjphoto/' || substr(t.user_code, 0, 17) ||
+--                '.jpg'                     as AVATAR,
+--                case
+--                    when t.user_password is not null then
+--                        t.user_password
+--                    else
+--                        '111111'
+--                    end                    as PASSWORD,
+--                '0'                        as STATUS,
+--                '0'                        as DEL_FLAG,
+--                t.user_code                as GMSFZHM,
+--                t.user_police_id           as JH
+--         from ntsjt.Tlpt_User t
+--         where t.user_police_id is not null
+--           and t.user_id is not null
+--           and t.user_status >= 2000
+    </select>
+
     <select id="selectUserList" parameterType="SysUser" resultMap="SysUserResult">
         select u.user_id, u.dept_id, u.nick_name, u.user_name, u.email, u.avatar, u.phonenumber, u.password, u.sex,
         u.status, u.del_flag, u.login_ip, u.login_date, u.create_by, u.create_time, u.remark, d.dept_name, d.leader from

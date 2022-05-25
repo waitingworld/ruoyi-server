@@ -10,6 +10,13 @@ import com.ruoyi.common.core.domain.entity.SysUser;
  * @author ruoyi
  */
 public interface ISysUserService {
+
+
+    /**
+     * 自动更新用户,从通联平台获取同步用户数据
+     */
+    public void autoUpdateUserInfo();
+
     /**
      * 根据条件分页查询用户列表
      *

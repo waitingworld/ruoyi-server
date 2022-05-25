@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +55,83 @@ public class SysUserServiceImpl implements ISysUserService {
 
     @Autowired
     private ISysConfigService configService;
+
+
+    @Override
+    public void autoUpdateUserInfo() {
+
+        SysUser tmp = new SysUser();
+        List<SysUser> currentUserList = userMapper.selectUserList(tmp);
+        List<SysUser> orgUserList = userMapper.selectOrgUserList();
+
+        HashMap<String, SysUser> currentUserMap = new HashMap<>();
+        HashMap<String, SysUser> orgUserMap = new HashMap<>();
+
+        for (SysUser sysUser : currentUserList) {
+            currentUserMap.put(sysUser.getUserId(), sysUser);
+        }
+        for (SysUser sysUser : orgUserList) {
+            orgUserMap.put(sysUser.getUserId(), sysUser);
+        }
+
+        List<String> currentUserIdList = new ArrayList<>(currentUserMap.keySet());
+        List<String> orgUserIdList = new ArrayList<>(orgUserMap.keySet());
+
+        List<SysUser> insertUserList = new ArrayList<>();
+        List<SysUser> removeUserList = new ArrayList<>();
+        List<SysUser> updateUserList = new ArrayList<>();
+
+        orgUserIdList.removeAll(currentUserIdList);//获取需要新增的用户
+        for (String userId : orgUserIdList) {
+            insertUserList.add(orgUserMap.get(userId));
+        }
+
+        currentUserIdList = new ArrayList<>(currentUserMap.keySet());
+        orgUserIdList = new ArrayList<>(orgUserMap.keySet());
+
+        currentUserIdList.removeAll(orgUserIdList);//获取需要删除的用户
+        for (String userId : currentUserIdList) {
+            removeUserList.add(currentUserMap.get(userId));
+        }
+
+        currentUserIdList = new ArrayList<>(currentUserMap.keySet());
+        orgUserIdList = new ArrayList<>(orgUserMap.keySet());
+
+        currentUserIdList.retainAll(orgUserIdList);//获取需要更新的用户
+        for (String userId : currentUserIdList) {
+            updateUserList.add(orgUserMap.get(userId));
+        }
+
+        System.out.println("====================================================");
+        System.out.println(insertUserList.stream().map(user -> user.getNickName()));
+        System.out.println(removeUserList.stream().map(user -> user.getNickName()));
+        System.out.println(updateUserList.stream().map(user -> user.getNickName()));
+        System.out.println("====================================================");
+
+        ///////////////////////////////////////////////
+
+        for (SysUser sysUser : insertUserList) {
+            try {
+                this.insertUser(sysUser);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (SysUser sysUser : removeUserList) {
+            try {
+                sysUser.setStatus("1");
+                this.updateUserStatus(sysUser);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (SysUser sysUser : updateUserList) {
+            userMapper.updateUser(sysUser);
+        }
+
+    }
 
     /**
      * 根据条件分页查询用户列表
