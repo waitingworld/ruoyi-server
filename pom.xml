@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ruoyi</groupId>
     <artifactId>ruoyi</artifactId>
@@ -22,7 +22,7 @@
         <bitwalker.version>1.21</bitwalker.version>
         <swagger.version>3.0.0</swagger.version>
         <kaptcha.version>2.3.2</kaptcha.version>
-<!--        <mybatis-spring-boot.version>2.2.0</mybatis-spring-boot.version>-->
+        <!--        <mybatis-spring-boot.version>2.2.0</mybatis-spring-boot.version>-->
         <mybatis-plus-spring-boot.version>3.4.3.4</mybatis-plus-spring-boot.version>
         <pagehelper.boot.version>1.4.0</pagehelper.boot.version>
         <fastjson.version>1.2.78</fastjson.version>
@@ -86,11 +86,11 @@
             </dependency>
 
             <!-- SpringBoot集成mybatis框架 -->
-<!--            <dependency>-->
-<!--                <groupId>org.mybatis.spring.boot</groupId>-->
-<!--                <artifactId>mybatis-spring-boot-starter</artifactId>-->
-<!--                <version>${mybatis-spring-boot.version}</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.mybatis.spring.boot</groupId>-->
+            <!--                <artifactId>mybatis-spring-boot-starter</artifactId>-->
+            <!--                <version>${mybatis-spring-boot.version}</version>-->
+            <!--            </dependency>-->
             <!-- SpringBoot集成mybatisPlus框架 -->
             <dependency>
                 <groupId>com.baomidou</groupId>
@@ -204,6 +204,11 @@
                 <artifactId>kaptcha</artifactId>
                 <version>${kaptcha.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.jhlabs</groupId>
+                <artifactId>filters</artifactId>
+                <version>2.0.235-1</version>
+            </dependency>
 
             <!-- 定时任务-->
             <dependency>
@@ -246,7 +251,6 @@
                 <artifactId>ruoyi-business</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
-
 
 
             <!-- activiti工作流-->
